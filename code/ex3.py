@@ -1,12 +1,15 @@
+import matplotlib
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io as scio
 from scipy.optimize import minimize
 
-# neural network
+
 
 # read data
+from sklearn.metrics import classification_report
+
 path = "../data/ex3data1.mat"
 data = scio.loadmat(path)
 # print(data)
@@ -25,8 +28,8 @@ def sigmoid(z):
 def regularized_cost(theta, X, y, lam):
     m = len(X)
     h = sigmoid(X @ theta.T)
-    j = 1 / m * (-y * np.log(h) - (1 - y) * np.log(1 - h))
-    penalty = lam * theta.T @ theta / 2 * m
+    j = 1 / m * (-y @ np.log(h) - (1 - y) @ np.log(1 - h))
+    penalty = lam * theta.T @ theta / (2 * m)
     return j + penalty
 
 
@@ -86,20 +89,48 @@ def plot_an_image(X):
     plt.yticks([])
     plt.show()
 
-#  
+def show_pictures(data):
+    sample_idx = np.random.choice(np.arange(data['X'].shape[0]), 100)
+    sample_images = data['X'][sample_idx, :]
+    fig, ax_array = plt.subplots(nrows=10, ncols=10, sharex=True, sharey=True, figsize=(12, 12))
+    for r in range(10):
+        for c in range(10):
+            ax_array[r, c].matshow(np.array(sample_images[10 * r + c].reshape((20, 20))).T, cmap=matplotlib.cm.binary)
+            plt.xticks(np.array([]))
+            plt.yticks(np.array([]))
+    plt.show()
+    
+# show pictures
+# show_pictures(data)
+#
 # plot_an_image(raw_X)
 X = np.insert(raw_X, 0, 1, axis=1)
-y = raw_y.ravel()
-y = y.reshape((y.shape[0], 1))
+# y = raw_y.ravel()
+y = raw_y.flatten()
+# y = y.reshape((y.shape[0], 1))
 print(y.shape)
 # print(type(X))
 # print(X.shape)
 # print(type(y))
 theta = np.zeros(X.shape[1])
 print(theta.shape)
-g = regularized_gradient(theta, X, y, 1)
-c = regularized_cost(theta, X, y, 1)
+# g = regularized_gradient(theta, X, y, 1)
+# c = regularized_cost(theta, X, y, 1)
 # print(g)
 # print(c)
+
+
+# compute theta
 all_theta = one_vs_all(X, y, 1, 10)
-print(all_theta)
+print(all_theta.shape)
+
+def predict_all(X, all_theta):
+    h = sigmoid(X @ all_theta.T)
+    h_argmax = np.argmax(h, axis=1)
+    h_argmax += 1
+    return h_argmax
+
+y_predict = predict_all(X, all_theta)
+accuracy = np.mean(y_predict == y)
+print("accuracy: {}%".format(accuracy*100))
+print(classification_report(data['y'], y_predict))
