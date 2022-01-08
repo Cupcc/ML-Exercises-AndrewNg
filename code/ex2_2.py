@@ -71,8 +71,8 @@ def boundary(theta, degree):
 
 
 # read data
-init_data = "../data/ex2data2.txt"
-init_data = pd.read_csv(init_data, header=None, names=['Test1', 'Test2', 'Accepted'])
+path = "../data/ex2data2.txt"
+init_data = pd.read_csv(path, header=None, names=['Test1', 'Test2', 'Accepted'])
 # print(init_data.info)
 # data processing
 degree = 5
